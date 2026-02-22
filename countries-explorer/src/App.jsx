@@ -4,12 +4,15 @@ import SearchBar from './components/SearchBar'
 import CountryCard from "./components/CardCountries";
 
 function App() {
-  const[countries,setCountries] = useState([])
-  const[loading,setLoading] = useState(false)
-  const[error,setError] =useState(null)
-  const[search,setSearch] =useState("")
-  const[region,setRegion] = useState("all")
+  const [countries, setCountries] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [search, setSearch] = useState("")
+  const [region, setRegion] = useState("all")
+  const [retryKey, setRetryKey] = useState(0)
+
   const trimmedText = search.trim();
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -28,16 +31,15 @@ function App() {
           url = `https://restcountries.com/v3.1/all?fields=name,flags,region,population`;
         }
 
-        const res = await fetch(url, {
-          signal: controller.signal,
-        });
+        const res = await fetch(url, { signal: controller.signal });
 
         if (!res.ok) {
           if (res.status === 404) {
             setCountries([]);
+            setError("No country found");
             return;
           }
-          throw new Error("Something went wrong  fetching countries");
+          throw new Error("Something went wrong fetching countries");
         }
 
         const data = await res.json();
@@ -55,28 +57,39 @@ function App() {
     fetchCountries();
 
     return () => controller.abort();
-  }, [trimmedText, region]);
+  }, [trimmedText, region, retryKey]);
+
   return (
-  <div style={{ padding: "15px" }}>
-    <h1>Countries Explorer</h1>
+    <div style={{ padding: "15px" }}>
+      <h1>Countries Explorer</h1>
 
-    <SearchBar
-      search={search}
-      setSearch={setSearch}
-      region={region}
-      setRegion={setRegion}
-    />
-<div className="countries">
-  {countries.map((country) => (
-    <CountryCard
-      key={country.name.common}
-      country={country}
-    />
-  ))}
-</div>
+      <SearchBar
+        search={search}
+        setSearch={setSearch}
+        region={region}
+        setRegion={setRegion}
+      />
 
-  </div>
-);
+      {loading && <p style={{ textAlign: "center" }}>Loading countries...</p>}
+
+      {error && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <p>Error: {error}</p>
+          <button onClick={() => setRetryKey(prev => prev + 1)}>
+            Retry
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div className="countries">
+          {countries.map((country) => (
+            <CountryCard key={country.name.common} country={country}/>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
