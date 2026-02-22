@@ -60,8 +60,8 @@ function App() {
   }, [trimmedText, region, retryKey]);
 
   return (
-    <div style={{ padding: "15px" }}>
-      <h1>Countries Explorer</h1>
+    <div className='container'>
+      <h1>🌎Countries Explorer ☪</h1>
 
       <SearchBar
         search={search}
