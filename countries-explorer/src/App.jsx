@@ -13,7 +13,7 @@ function App() {
 
   const trimmedText = search.trim();
 
-  useEffect(() => {
+  useEffect(() => {    
     const controller = new AbortController();
 
     async function fetchCountries() {
